@@ -1,0 +1,270 @@
+--- Local Libary
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+
+
+--- Title | Theme
+local Window = Library.CreateLib("Zealandia Hub", "Serpent")
+
+-- Updates
+local Home = Window:NewTab("Home")
+local HomeSection = Home:NewSection("GUI Made by • Onyx#5735")
+local HomeSection = Home:NewSection("• Added More Teleports")
+local HomeSection = Home:NewSection("• Added Admin Commands")
+local HomeSection = Home:NewSection("• Added Auto Farm futures")
+HomeSection:NewKeybind("UI Keybind | Click to set", "Set keybind for the UI", Enum.KeyCode.RightAlt, function()
+	Library:ToggleUI()
+end)
+
+
+
+-- Main Window
+local Main = Window:NewTab("Main")
+local MainSection = Main:NewSection("Main")
+
+MainSection:NewButton("Anti Job AFK", "Job AFK", function()
+    while true do wait()
+        local args = {
+            [1] = true
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("AfkEvent"):FireServer(unpack(args))
+        end
+end)
+
+
+MainSection:NewButton("Game Anti AFK", "So you don't get kicked for being idle for 20 minutes", function()
+    wait(0.5)local ba=Instance.new("ScreenGui")
+    local ca=Instance.new("TextLabel")local da=Instance.new("Frame")
+    local _b=Instance.new("TextLabel")local ab=Instance.new("TextLabel")ba.Parent=game.CoreGui
+    ba.ZIndexBehavior=Enum.ZIndexBehavior.Sibling;ca.Parent=ba;ca.Active=true
+    ca.BackgroundColor3=Color3.new(0.176471,0.176471,0.176471)ca.Draggable=true
+    ca.Position=UDim2.new(0.698610067,0,0.098096624,0)ca.Size=UDim2.new(0,370,0,52)
+    ca.Font=Enum.Font.SourceSansSemibold;ca.Text="Anti AFK Script"ca.TextColor3=Color3.new(0,1,1)
+    ca.TextSize=22;da.Parent=ca
+    da.BackgroundColor3=Color3.new(0.196078,0.196078,0.196078)da.Position=UDim2.new(0,0,1.0192306,0)
+    da.Size=UDim2.new(0,370,0,107)_b.Parent=da
+    _b.BackgroundColor3=Color3.new(0.176471,0.176471,0.176471)_b.Position=UDim2.new(0,0,0.800455689,0)
+    _b.Size=UDim2.new(0,370,0,21)_b.Font=Enum.Font.Arial;_b.Text="Made by Zealandia Hub"
+    _b.TextColor3=Color3.new(0,1,1)_b.TextSize=20;ab.Parent=da
+    ab.BackgroundColor3=Color3.new(0.176471,0.176471,0.176471)ab.Position=UDim2.new(0,0,0.158377,0)
+    ab.Size=UDim2.new(0,370,0,44)ab.Font=Enum.Font.ArialBold;ab.Text="Status: Active"
+    ab.TextColor3=Color3.new(0,1,1)ab.TextSize=20;local bb=game:service'VirtualUser'
+    game:service'Players'.LocalPlayer.Idled:connect(function()
+    bb:CaptureController()bb:ClickButton2(Vector2.new())
+    ab.Text="Roblox tried to kick u but i kicked him instead"wait(2)ab.Text="Status : Active"end)
+end)
+
+
+MainSection:NewButton("Join Smallest Server", "Joins the smallest server in the game!", function()
+    local PlaceID = game.PlaceId
+    local AllIDs = {}
+    local foundAnything = ""
+    local actualHour = os.date("!*t").hour
+    local Deleted = false
+    
+    local last
+    
+    local File = pcall(function()
+       AllIDs = game:GetService('HttpService'):JSONDecode(readfile("NotSameServers.json"))
+    end)
+    if not File then
+       table.insert(AllIDs, actualHour)
+       writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
+    end
+    function TPReturner()
+       local Site;
+       if foundAnything == "" then
+           Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+       else
+           Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+       end
+       local ID = ""
+       if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+           foundAnything = Site.nextPageCursor
+       end
+       local num = 0;
+       local extranum = 0
+       for i,v in pairs(Site.data) do
+           extranum += 1
+           local Possible = true
+           ID = tostring(v.id)
+           if tonumber(v.maxPlayers) > tonumber(v.playing) then
+               if extranum ~= 1 and tonumber(v.playing) < last or extranum == 1 then
+                   last = tonumber(v.playing)
+               elseif extranum ~= 1 then
+                   continue
+               end
+               for _,Existing in pairs(AllIDs) do
+                   if num ~= 0 then
+                       if ID == tostring(Existing) then
+                           Possible = false
+                       end
+                   else
+                       if tonumber(actualHour) ~= tonumber(Existing) then
+                           local delFile = pcall(function()
+                               delfile("NotSameServers.json")
+                               AllIDs = {}
+                               table.insert(AllIDs, actualHour)
+                           end)
+                       end
+                   end
+                   num = num + 1
+               end
+               if Possible == true then
+                   table.insert(AllIDs, ID)
+                   wait()
+                   pcall(function()
+                       writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
+                       wait()
+                       game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+                   end)
+                   wait(4)
+               end
+           end
+       end
+    end
+    
+    function Teleport()
+       while wait() do
+           pcall(function()
+               TPReturner()
+               if foundAnything ~= "" then
+                   TPReturner()
+               end
+           end)
+       end
+    end
+    
+    Teleport()
+end)
+
+
+-- Teleport Window
+local Main = Window:NewTab("Teleports")
+local MainSection = Main:NewSection("Teleports")
+
+
+MainSection:NewButton("Spawn", "Teleports you to Spawn", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2441.49243, 23.3501358, -272.573914, 0.866902709, -7.21614057e-08, 0.498477399, 4.10209857e-08, 1, 7.34239904e-08, -0.498477399, -4.32034177e-08, 0.866902709)
+end)
+
+
+MainSection:NewButton("Studrac", "Teleports you to Studrac Gas Station", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(3348.89331, 22.8499985, -344.214905, 0.925388157, -4.36452581e-08, -0.37902078, 1.16061676e-08, 1, -8.68159518e-08, 0.37902078, 7.59394752e-08, 0.925388157)
+end)
+
+
+MainSection:NewButton("Waterpark", "Teleports you to the Waterpark", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(4359.85449, 20.7249985, 3735.55127, -0.018803278, 3.53970897e-08, -0.999823213, 1.07414744e-08, 1, 3.52013352e-08, 0.999823213, -1.00776747e-08, -0.018803278)
+end)
+
+
+MainSection:NewButton("Police Station", "Teleports you to the Police Station", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(5871.93213, 22.8500042, 644.783752, 0.0134618655, 1.14384029e-07, -0.999909401, 3.3993004e-08, 1, 1.1485205e-07, 0.999909401, -3.5536047e-08, 0.0134618655)
+end)
+
+
+MainSection:NewButton("Bank", "Teleports you to the Bank", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(6366.19727, 23.3499832, 72.8388138, 0.999923408, -7.36160644e-08, 0.0123771625, 7.26515523e-08, 1, 7.83762673e-08, -0.0123771625, -7.74710429e-08, 0.999923408)
+end)
+
+
+MainSection:NewButton("Sunset Performance", "Teleports you to Sunset Performance", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(6919.87061, 23.350029, -15.9596987, 0.996977091, -8.76408919e-08, -0.0776962861, 8.61626432e-08, 1, -2.23782717e-08, 0.0776962861, 1.56161057e-08, 0.996977091)
+end)
+
+
+MainSection:NewButton("Bubmart", "Teleports you to Bubmart", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(8793.53906, 22.8499985, -666.000977, 0.698640525, 1.32808191e-08, 0.715472817, 4.73299657e-08, 1, -6.47787743e-08, -0.715472817, 7.91203831e-08, 0.6986405251)
+end)
+
+
+MainSection:NewButton("Vorzen", "Teleports you to Vorzen", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(8931.88867, 22.8500042, -307.590332, -0.0264507122, 2.52318655e-09, 0.999650121, 7.02313869e-08, 1, -6.65749067e-10, -0.999650121, 7.01892091e-08, -0.0264507122)
+end)
+
+
+MainSection:NewButton("Jeff's Pizza", "Teleports you to Jeff's Pizza", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(8519.25977, 22.849926, -610.457092, 0.692409277, 1.05407398e-08, 0.721504986, 5.33958868e-08, 1, -6.58519994e-08, -0.721504986, 8.4121929e-08, 0.692409277)
+end)
+
+
+MainSection:NewButton("Automart", "Teleports you to Automart", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(9128.24023, 22.8499222, -882.401245, -0.00553995324, 7.93036534e-08, 0.999984682, 3.04092431e-08, 1, -7.91364059e-08, -0.999984682, 2.99703657e-08, -0.00553995324)
+end)
+
+
+MainSection:NewButton("CVC Pharmacy", "Teleports you to CVC Pharmacy", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(9562.13086, 22.849905, -846.499756, 0.999987781, 1.07479226e-08, 0.00494444882, -1.10481695e-08, 1, 6.06966353e-08, -0.00494444882, -6.07505157e-08, 0.999987781)
+end)
+
+
+MainSection:NewButton("Sussy Mechanics Shop", "Teleports you to Sussy Mechanics Shop", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(9131.13086, 22.9749813, -1433.2085, -0.999968946, 5.73374308e-08, 0.00788158551, 5.70616194e-08, 1, -3.5219518e-08, -0.00788158551, -3.47686857e-08, -0.999968946)
+end)
+
+
+MainSection:NewButton("Starblocks", "Teleports you to Starblocks", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(9510.06934, 22.8500118, -4114.97559, -0.000489924569, 5.02962116e-09, -0.999999881, 1.37559635e-08, 1, 5.02288255e-09, 0.999999881, -1.37535006e-08, -0.000489924569)
+end)
+
+
+MainSection:NewButton("Fintech", "Teleports you to Fintech", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(8749.18262, 22.8501053, -2724.33984, 0.0207972117, 8.11481371e-08, -0.999783695, -1.54833977e-08, 1, 8.08436127e-08, 0.999783695, 1.37987275e-08, 0.0207972117)
+end)
+
+
+MainSection:NewButton("LHS Hospital", "Teleports you to LHS Hospital", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(9058.1875, 22.8541489, -4638.72803, 0.0320285186, 5.17729026e-10, 0.999486983, -4.6787324e-10, 1, -5.03001807e-10, -0.999486983, -4.51522791e-10, 0.0320285186)
+end)
+
+
+MainSection:NewButton("Carwash", "Teleports you to the Carwash", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(9657.85645, 22.8499527, 2316.46118, 0.99999994, 1.4343021e-08, 0.000422141282, -1.43473446e-08, 1, 1.02390354e-08, -0.000422141282, -1.0245091e-08, 0.99999994)
+end)
+
+
+MainSection:NewButton("McBloxxer's", "Teleports you to McBloxxer's", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(9615.50391, 22.8500023, 1263.6969, 0.999970973, 2.84940649e-09, 0.00761875184, -3.90971833e-09, 1, 1.39156427e-07, -0.00761875184, -1.39182177e-07, 0.999970973)
+end)
+
+
+MainSection:NewButton("Dealership", "Teleports you to the Dealership", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(8961.24902, 24.7253075, 3104.41919, -0.0487641804, 1.70369994e-08, 0.998810291, 6.84158108e-09, 1, -1.67232717e-08, -0.998810291, 6.01794525e-09, -0.0487641804)
+end)
+
+
+MainSection:NewButton("Mirage", "Teleports you to Mirage", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(8772.94727, 22.7419376, 981.289795, -0.00514270924, -4.66562167e-09, 0.999986768, 1.65318923e-08, 1, 4.75070294e-09, -0.999986768, 1.65561058e-08, -0.00514270924)
+end)
+
+
+MainSection:NewButton("Fire Station", "Teleports you to the Fire Station", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(7054.28857, 22.3500061, 191.106186, -0.0101023084, 3.82536172e-08, -0.999948978, -8.75918005e-08, 1, 3.91404953e-08, 0.999948978, 8.79827411e-08, -0.0101023084)
+end)
+
+
+MainSection:NewButton("Gulf Paradise Condos", "Teleports you to Gulf Paradise Condos", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2487.31274, 22.974617, -7757.54346, 0.0735407099, 2.38960629e-09, 0.997292221, 4.71136952e-09, 1, -2.74351253e-09, -0.997292221, 4.90037211e-09, 0.0735407099)
+end)
+
+
+MainSection:NewButton("Seaside Bar And Grill", "Teleports you to Seaside Bar And Grills", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-1804.16736, 22.5999966, -7641.01318, -0.0930950642, 6.67029667e-08, -0.995657206, -5.89719455e-08, 1, 7.25078451e-08, 0.995657206, 6.54659686e-08, -0.0930950642)
+end)
+
+
+
+-- Admin Commands
+local Main = Window:NewTab("Admin Commands")
+local MainSection = Main:NewSection("Admin Commands")
+
+
+MainSection:NewButton("Infinite Yield", "Admin Commands", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+end)
+
+
+MainSection:NewButton("Fates Admin", "Admin Commands", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/fatesc/fates-admin/main/main.lua"))();
+end)
